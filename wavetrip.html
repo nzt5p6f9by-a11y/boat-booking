@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WaveTrip – Boat Booking & Fishing Trips</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ocean-deep:   #0A2540;
+    --ocean-mid:    #0D4F8B;
+    --ocean-bright: #1A8FD1;
+    --ocean-light:  #5BB8F5;
+    --wave-cyan:    #00C6C2;
+    --sand:         #F4EFE0;
+    --sand-dark:    #E8DFCC;
+    --gold:         #D4A84B;
+    --white:        #FFFFFF;
+    --text-dark:    #0A1628;
+    --text-mid:     #2A4560;
+    --text-muted:   #6B87A2;
+    --radius-sm:    8px;
+    --radius-md:    16px;
+    --radius-lg:    28px;
+    --shadow-soft:  0 8px 40px rgba(10,37,64,0.10);
+    --shadow-card:  0 4px 24px rgba(10,37,64,0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--white);
+    color: var(--text-dark);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 60px;
+    background: rgba(10,37,64,0.92);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(91,184,245,0.12);
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--white);
+    text-decoration: none;
+    letter-spacing: -0.3px;
+  }
+  .nav-logo .wave-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--wave-cyan), var(--ocean-bright));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .nav-links {
+    display: flex; gap: 36px; list-style: none;
+  }
+  .nav-links a {
+    color: rgba(255,255,255,0.75); text-decoration: none;
+    font-size: 0.9rem; font-weight: 500; letter-spacing: 0.2px;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ocean-light); }
+  .nav-cta {
+    background: var(--wave-cyan); color: var(--ocean-deep) !important;
+    padding: 10px 22px; border-radius: 50px;
+    font-weight: 600 !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+  }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,198,194,0.4); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(26,143,209,0.18) 0%, transparent 70%),
+      linear-gradient(170deg, var(--ocean-deep) 0%, #0b3361 55%, #0e5b9c 100%);
+    display: flex; align-items: center;
+    padding: 140px 60px 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; bottom: -2px; left: 0; right: 0; height: 160px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 160'%3E%3Cpath fill='%23ffffff' d='M0,96 C240,160 480,32 720,96 C960,160 1200,32 1440,96 L1440,160 L0,160 Z'/%3E%3C/svg%3E") no-repeat bottom center / cover;
+  }
+  /* animated circles */
+  .hero-orb {
+    position: absolute; border-radius: 50%;
+    background: rgba(91,184,245,0.07);
+    animation: float 8s ease-in-out infinite;
+  }
+  .hero-orb.o1 { width: 600px; height: 600px; top: -200px; right: -100px; animation-delay: 0s; }
+  .hero-orb.o2 { width: 380px; height: 380px; bottom: 60px; left: -80px; animation-delay: 3s; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-24px); } }
+
+  .hero-content { position: relative; z-index: 2; max-width: 620px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,198,194,0.12); border: 1px solid rgba(0,198,194,0.3);
+    color: var(--wave-cyan); padding: 7px 18px; border-radius: 50px;
+    font-size: 0.82rem; font-weight: 600; letter-spacing: 0.8px;
+    text-transform: uppercase; margin-bottom: 28px;
+  }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.6rem, 5vw, 4rem);
+    color: var(--white); line-height: 1.13;
+    margin-bottom: 24px; letter-spacing: -0.5px;
+  }
+  .hero-title em { font-style: italic; color: var(--ocean-light); }
+  .hero-subtitle {
+    font-size: 1.1rem; color: rgba(255,255,255,0.72);
+    font-weight: 300; max-width: 480px; margin-bottom: 44px;
+    line-height: 1.75;
+  }
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--wave-cyan); color: var(--ocean-deep);
+    padding: 16px 36px; border-radius: 50px; border: none;
+    font-size: 1rem; font-weight: 600; cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-block;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,198,194,0.4); }
+  .btn-ghost {
+    background: transparent; color: var(--white);
+    padding: 16px 36px; border-radius: 50px;
+    border: 1.5px solid rgba(255,255,255,0.35);
+    font-size: 1rem; font-weight: 500; cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+    display: inline-block;
+  }
+  .btn-ghost:hover { border-color: var(--wave-cyan); background: rgba(0,198,194,0.08); }
+
+  .hero-stats {
+    position: absolute; right: 60px; bottom: 180px; z-index: 2;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .stat-pill {
+    background: rgba(255,255,255,0.1); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 16px 24px; border-radius: var(--radius-md);
+    color: var(--white); text-align: center;
+    min-width: 140px;
+  }
+  .stat-pill .num { font-size: 1.8rem; font-weight: 700; font-family: 'Playfair Display', serif; }
+  .stat-pill .lbl { font-size: 0.78rem; color: rgba(255,255,255,0.65); margin-top: 2px; }
+
+  /* ── SECTIONS SHARED ── */
+  section { padding: 100px 60px; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--ocean-bright); font-size: 0.8rem; font-weight: 600;
+    letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .section-label::before { content: ''; display: block; width: 28px; height: 2px; background: var(--wave-cyan); border-radius: 2px; }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+    color: var(--ocean-deep); line-height: 1.2; letter-spacing: -0.3px;
+  }
+  .section-intro { font-size: 1.05rem; color: var(--text-muted); max-width: 540px; margin-top: 12px; line-height: 1.8; }
+
+  /* ── FEATURES ── */
+  #features { background: var(--white); }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px; margin-top: 56px;
+  }
+  .feature-card {
+    background: var(--white);
+    border: 1.5px solid var(--sand-dark);
+    border-radius: var(--radius-lg);
+    padding: 36px 32px;
+    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+    position: relative; overflow: hidden;
+  }
+  .feature-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--wave-cyan), var(--ocean-bright));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .feature-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-soft); border-color: rgba(26,143,209,0.2); }
+  .feature-card:hover::after { transform: scaleX(1); }
+  .feature-icon {
+    width: 54px; height: 54px; border-radius: 14px;
+    background: linear-gradient(135deg, #E8F5FF, #C8E8FA);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 22px;
+  }
+  .feature-card h3 {
+    font-size: 1.1rem; font-weight: 600; color: var(--ocean-deep);
+    margin-bottom: 10px;
+  }
+  .feature-card p { font-size: 0.95rem; color: var(--text-muted); line-height: 1.7; }
+
+  /* ── HOW IT WORKS ── */
+  #how { background: linear-gradient(160deg, #F7FBFF 0%, #EBF5FA 100%); }
+  .steps { display: flex; flex-direction: column; gap: 0; margin-top: 64px; position: relative; max-width: 680px; }
+  .steps::before {
+    content: '';
+    position: absolute; left: 27px; top: 36px; bottom: 36px; width: 2px;
+    background: linear-gradient(to bottom, var(--wave-cyan), var(--ocean-bright), transparent);
+  }
+  .step { display: flex; gap: 32px; align-items: flex-start; padding: 0 0 52px; }
+  .step-num {
+    flex-shrink: 0;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--ocean-deep); color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; font-weight: 700;
+    position: relative; z-index: 1;
+    box-shadow: 0 0 0 6px rgba(26,143,209,0.1);
+  }
+  .step-body h3 { font-size: 1.1rem; font-weight: 600; color: var(--ocean-deep); margin-bottom: 8px; padding-top: 14px; }
+  .step-body p { font-size: 0.95rem; color: var(--text-muted); line-height: 1.75; }
+
+  /* ── BOATS / LISTINGS ── */
+  #boats { background: var(--white); }
+  .boats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 28px; margin-top: 56px;
+  }
+  .boat-card {
+    border-radius: var(--radius-lg); overflow: hidden;
+    border: 1.5px solid var(--sand-dark);
+    background: var(--white);
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+  .boat-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-soft); }
+  .boat-img {
+    height: 210px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 4rem; position: relative;
+  }
+  .boat-img.b1 { background: linear-gradient(135deg, #0A3D6B 0%, #1A8FD1 100%); }
+  .boat-img.b2 { background: linear-gradient(135deg, #064C60 0%, #0DABB8 100%); }
+  .boat-img.b3 { background: linear-gradient(135deg, #1B2460 0%, #4A6CF7 100%); }
+  .boat-badge {
+    position: absolute; top: 16px; left: 16px;
+    background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: var(--white); padding: 5px 14px; border-radius: 50px;
+    font-size: 0.77rem; font-weight: 600; letter-spacing: 0.3px;
+  }
+  .boat-body { padding: 24px 26px 28px; }
+  .boat-stars { color: var(--gold); font-size: 0.85rem; margin-bottom: 8px; }
+  .boat-body h3 { font-size: 1.05rem; font-weight: 600; color: var(--ocean-deep); margin-bottom: 6px; }
+  .boat-meta { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 18px; }
+  .boat-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .tag {
+    background: #EBF5FA; color: var(--ocean-mid);
+    padding: 4px 12px; border-radius: 50px;
+    font-size: 0.78rem; font-weight: 500;
+  }
+  .boat-footer { display: flex; align-items: center; justify-content: space-between; }
+  .price-block .amount { font-size: 1.3rem; font-weight: 700; color: var(--ocean-deep); }
+  .price-block .per { font-size: 0.82rem; color: var(--text-muted); margin-left: 4px; }
+  .btn-book {
+    background: var(--ocean-deep); color: var(--white);
+    padding: 10px 22px; border-radius: 50px;
+    border: none; font-size: 0.88rem; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-book:hover { background: var(--ocean-mid); transform: translateY(-1px); }
+
+  /* ── PAYMENT ── */
+  #payment {
+    background: linear-gradient(150deg, var(--ocean-deep) 0%, #0c3d72 100%);
+    color: var(--white);
+  }
+  #payment .section-label { color: var(--wave-cyan); }
+  #payment h2 { color: var(--white); }
+  #payment .section-intro { color: rgba(255,255,255,0.65); }
+  .payment-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 56px;
+  }
+  .pay-card {
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14);
+    border-radius: var(--radius-lg); padding: 40px 36px;
+    backdrop-filter: blur(10px);
+    transition: transform 0.25s, background 0.25s;
+  }
+  .pay-card:hover { transform: translateY(-4px); background: rgba(255,255,255,0.11); }
+  .pay-icon { font-size: 2.4rem; margin-bottom: 20px; }
+  .pay-card h3 { font-size: 1.15rem; font-weight: 600; color: var(--white); margin-bottom: 10px; }
+  .pay-card p { font-size: 0.95rem; color: rgba(255,255,255,0.62); line-height: 1.75; }
+
+  /* ── REVIEWS ── */
+  #reviews { background: var(--sand); }
+  .reviews-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px; margin-top: 56px;
+  }
+  .review-card {
+    background: var(--white); border-radius: var(--radius-md);
+    padding: 30px 28px; border: 1.5px solid var(--sand-dark);
+    box-shadow: var(--shadow-card);
+  }
+  .review-stars { color: var(--gold); font-size: 0.9rem; margin-bottom: 14px; }
+  .review-text { font-size: 0.97rem; color: var(--text-mid); line-height: 1.75; margin-bottom: 20px; font-style: italic; }
+  .reviewer { display: flex; align-items: center; gap: 12px; }
+  .avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.88rem; color: var(--white);
+    flex-shrink: 0;
+  }
+  .av1 { background: linear-gradient(135deg, #1A8FD1, #00C6C2); }
+  .av2 { background: linear-gradient(135deg, #0A2540, #1A8FD1); }
+  .av3 { background: linear-gradient(135deg, #D4A84B, #E87E2A); }
+  .reviewer-name { font-weight: 600; font-size: 0.9rem; color: var(--ocean-deep); }
+  .reviewer-loc { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* ── CTA BAND ── */
+  .cta-band {
+    background: linear-gradient(120deg, var(--wave-cyan) 0%, var(--ocean-bright) 100%);
+    padding: 80px 60px;
+    text-align: center;
+  }
+  .cta-band h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    color: var(--ocean-deep); margin-bottom: 16px;
+  }
+  .cta-band p { color: rgba(10,37,64,0.7); font-size: 1.05rem; margin-bottom: 36px; }
+  .cta-band .btn-dark {
+    background: var(--ocean-deep); color: var(--white);
+    padding: 17px 44px; border-radius: 50px; border: none;
+    font-size: 1.05rem; font-weight: 600; cursor: pointer;
+    text-decoration: none; display: inline-block;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .cta-band .btn-dark:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(10,37,64,0.35); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ocean-deep); color: rgba(255,255,255,0.55);
+    padding: 60px 60px 40px;
+  }
+  .footer-grid {
+    display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr;
+    gap: 48px; margin-bottom: 56px;
+  }
+  .footer-brand .nav-logo { margin-bottom: 16px; display: inline-flex; }
+  .footer-brand p { font-size: 0.9rem; line-height: 1.75; max-width: 240px; }
+  .footer-col h4 { color: var(--white); font-size: 0.9rem; font-weight: 600; margin-bottom: 16px; }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--wave-cyan); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 28px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.82rem;
+  }
+  .footer-bottom span { color: rgba(255,255,255,0.35); }
+
+  /* scrolling fade-in */
+  .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.65s ease, transform 0.65s ease; }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    section { padding: 70px 24px; }
+    .hero { padding: 120px 24px 80px; }
+    .hero-stats { display: none; }
+    .payment-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .cta-band { padding: 60px 24px; }
+    footer { padding: 50px 24px 32px; }
+    .footer-bottom { flex-direction: column; gap: 10px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <span class="wave-icon">🌊</span>
+    WaveTrip
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#boats">Browse Boats</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+    <li><a href="#" class="nav-cta">Book a Trip</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-orb o1"></div>
+  <div class="hero-orb o2"></div>
+
+  <div class="hero-content fade-up">
+    <div class="hero-badge">🇸🇦 Saudi Arabia's Premier Boat Platform</div>
+    <h1 class="hero-title">
+      Set Sail on<br/>
+      Your Perfect<br/>
+      <em>Fishing Adventure</em>
+    </h1>
+    <p class="hero-subtitle">
+      Browse verified boats, compare packages, add activity bundles, and book instantly — all in one place. No phone calls. No guesswork.
+    </p>
+    <div class="hero-actions">
+      <a href="#boats" class="btn-primary">Explore Boats</a>
+      <a href="#how" class="btn-ghost">How It Works</a>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-pill">
+      <div class="num">50+</div>
+      <div class="lbl">Verified Boats</div>
+    </div>
+    <div class="stat-pill">
+      <div class="num">4.9★</div>
+      <div class="lbl">Average Rating</div>
+    </div>
+    <div class="stat-pill">
+      <div class="num">2</div>
+      <div class="lbl">Payment Options</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">What We Offer</div>
+  <h2>Everything You Need, <br/>In One Platform</h2>
+  <p class="section-intro">WaveTrip connects boat owners and fishing enthusiasts on a single, transparent marketplace designed for Saudi Arabia.</p>
+
+  <div class="features-grid">
+    <div class="feature-card fade-up">
+      <div class="feature-icon">🔍</div>
+      <h3>Browse & Compare</h3>
+      <p>View multiple boats side by side with photos, time slots, capacity, and package pricing — all in one place. No more calling around.</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon">📦</div>
+      <h3>Activity Bundles</h3>
+      <p>Enrich your trip with optional add-on activities at booking time. Choose snorkeling, fishing gear, catering, and more.</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon">💳</div>
+      <h3>Flexible Payment</h3>
+      <p>Pay securely online via Visa, or choose pay-on-arrival. Full flexibility to suit your comfort level.</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon">⭐</div>
+      <h3>Verified Reviews</h3>
+      <p>Post-trip reviews and star ratings from real customers build genuine trust. See aggregate scores on every boat owner profile.</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon">📋</div>
+      <h3>Booking History</h3>
+      <p>Track all your past and upcoming bookings in one dashboard. No more lost confirmations or confusion.</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon">⚓</div>
+      <h3>Owner Dashboard</h3>
+      <p>Boat owners can easily list, edit, and manage their vessels, time slots, and packages from a simple interface — no tech skills needed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-label">The Process</div>
+  <h2>From Browse to <br/>Boarding in Minutes</h2>
+  <p class="section-intro">WaveTrip's streamlined booking flow gets you on the water without the hassle.</p>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; margin-top: 20px;">
+    <div class="steps">
+      <div class="step fade-up">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Browse Boat Listings</h3>
+          <p>Explore available boats with photos, capacity details, and time slots. Filter by date, location, and package price to find your ideal match.</p>
+        </div>
+      </div>
+      <div class="step fade-up">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Select a Time Slot</h3>
+          <p>Pick an available departure time that works for you. If a slot is full, the system instantly suggests alternative dates.</p>
+        </div>
+      </div>
+      <div class="step fade-up">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Add Activity Bundles</h3>
+          <p>Upgrade your trip with optional activity bundles — fishing gear, snorkeling, catering, and more — all added before you confirm.</p>
+        </div>
+      </div>
+      <div class="step fade-up">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Pay & Get Confirmed</h3>
+          <p>Choose Visa or pay-on-arrival. Your booking is confirmed instantly, and the boat owner is notified of your reservation right away.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- visual mock booking card -->
+    <div class="fade-up" style="position: sticky; top: 120px;">
+      <div style="background: var(--white); border-radius: 24px; padding: 32px; border: 1.5px solid var(--sand-dark); box-shadow: 0 16px 56px rgba(10,37,64,0.10);">
+        <div style="background: linear-gradient(135deg, #0A3D6B, #1A8FD1); border-radius: 16px; height: 160px; display:flex; align-items:center; justify-content:center; font-size:3rem; margin-bottom: 24px; position: relative;">
+          ⛵
+          <span style="position:absolute; top:14px; right:14px; background:rgba(255,255,255,0.18); color:#fff; padding:5px 12px; border-radius:50px; font-size:0.76rem; font-weight:600; backdrop-filter:blur(8px);">Available Today</span>
+        </div>
+        <h3 style="font-size:1.1rem; font-weight:600; color:var(--ocean-deep); margin-bottom:4px;">Al Wajh Fishing Charter</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:18px;">Capacity: 8 persons · Eastern Coast</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+          <span class="tag">Fishing Gear</span>
+          <span class="tag">6 Hours</span>
+          <span class="tag">Catering Add-on</span>
+        </div>
+        <div style="border-top:1.5px solid var(--sand-dark); padding-top:20px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:1.5rem; font-weight:700; color:var(--ocean-deep);">SAR 850</div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">per trip</div>
+          </div>
+          <a href="#" class="btn-book">Book Now →</a>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:16px; align-items:center;">
+          <span style="color:var(--gold);">★★★★★</span>
+          <span style="font-size:0.83rem; color:var(--text-muted);">4.9 · 38 reviews</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOATS -->
+<section id="boats">
+  <div class="section-label">Our Fleet</div>
+  <h2>Featured Boats</h2>
+  <p class="section-intro">Hand-verified listings from trusted owners across Saudi Arabia's coastline.</p>
+
+  <div class="boats-grid" style="margin-top:56px;">
+    <div class="boat-card fade-up">
+      <div class="boat-img b1">
+        ⛵
+        <span class="boat-badge">Fishing · Deep Sea</span>
+      </div>
+      <div class="boat-body">
+        <div class="boat-stars">★★★★★ <span style="color:var(--text-muted); font-weight:400;">4.9</span></div>
+        <h3>Blue Horizon Charter</h3>
+        <p class="boat-meta">Capacity: 10 · Jeddah Waterfront</p>
+        <div class="boat-tags">
+          <span class="tag">Deep-Sea Fishing</span>
+          <span class="tag">Full Day</span>
+          <span class="tag">Gear Included</span>
+        </div>
+        <div class="boat-footer">
+          <div class="price-block">
+            <span class="amount">SAR 1,200</span>
+            <span class="per">/ trip</span>
+          </div>
+          <a href="#" class="btn-book">Book</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="boat-card fade-up">
+      <div class="boat-img b2">
+        🚤
+        <span class="boat-badge">Leisure · Snorkeling</span>
+      </div>
+      <div class="boat-body">
+        <div class="boat-stars">★★★★★ <span style="color:var(--text-muted); font-weight:400;">4.8</span></div>
+        <h3>Coral Wave Explorer</h3>
+        <p class="boat-meta">Capacity: 6 · Al Khobar Marina</p>
+        <div class="boat-tags">
+          <span class="tag">Snorkeling</span>
+          <span class="tag">Half Day</span>
+          <span class="tag">Catering</span>
+        </div>
+        <div class="boat-footer">
+          <div class="price-block">
+            <span class="amount">SAR 750</span>
+            <span class="per">/ trip</span>
+          </div>
+          <a href="#" class="btn-book">Book</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="boat-card fade-up">
+      <div class="boat-img b3">
+        🛥️
+        <span class="boat-badge">Premium · Sunset</span>
+      </div>
+      <div class="boat-body">
+        <div class="boat-stars">★★★★★ <span style="color:var(--text-muted); font-weight:400;">5.0</span></div>
+        <h3>Desert Star Yacht</h3>
+        <p class="boat-meta">Capacity: 12 · Dammam Port</p>
+        <div class="boat-tags">
+          <span class="tag">Sunset Cruise</span>
+          <span class="tag">BBQ Bundle</span>
+          <span class="tag">Photography</span>
+        </div>
+        <div class="boat-footer">
+          <div class="price-block">
+            <span class="amount">SAR 1,800</span>
+            <span class="per">/ trip</span>
+          </div>
+          <a href="#" class="btn-book">Book</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:48px;">
+    <a href="#" class="btn-book" style="padding:14px 40px; font-size:0.95rem; background:var(--ocean-deep);">View All Listings →</a>
+  </div>
+</section>
+
+<!-- PAYMENT -->
+<section id="payment">
+  <div class="section-label">Payments</div>
+  <h2>Pay Your Way</h2>
+  <p class="section-intro">We offer two secure payment options so every customer feels comfortable booking on WaveTrip.</p>
+
+  <div class="payment-grid">
+    <div class="pay-card fade-up">
+      <div class="pay-icon">💳</div>
+      <h3>Online via Visa</h3>
+      <p>Pay securely at the time of booking through our encrypted payment gateway. Get instant confirmation and peace of mind before you even leave shore.</p>
+    </div>
+    <div class="pay-card fade-up">
+      <div class="pay-icon">🤝</div>
+      <h3>Pay on Arrival</h3>
+      <p>Prefer to pay in person? Reserve your trip now and settle the bill when you meet your captain at the dock. No card required upfront.</p>
+    </div>
+  </div>
+
+  <div style="margin-top: 56px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-lg); padding: 40px 48px; display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
+    <div style="font-size:2rem;">🔒</div>
+    <div>
+      <h3 style="color:var(--white); font-size:1rem; font-weight:600; margin-bottom:6px;">Bank-Grade Security</h3>
+      <p style="color:rgba(255,255,255,0.6); font-size:0.93rem; max-width:560px;">All online payments are processed through a certified secure gateway. Passwords are hashed. Your financial data is never stored on WaveTrip's servers.</p>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="section-label">Testimonials</div>
+  <h2>What Our Customers Say</h2>
+  <p class="section-intro">Post-trip reviews from real WaveTrip users — verified and unedited.</p>
+
+  <div class="reviews-grid">
+    <div class="review-card fade-up">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"Finally a platform where I can actually compare boats and see real prices. Booked a deep-sea fishing trip in under 5 minutes. Amazing experience!"</p>
+      <div class="reviewer">
+        <div class="avatar av1">FK</div>
+        <div>
+          <div class="reviewer-name">Faisal K.</div>
+          <div class="reviewer-loc">Riyadh · Fishing Enthusiast</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-card fade-up">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"The activity bundles are a brilliant idea. Added a catering package for my family trip and it was absolutely worth it. WaveTrip made it seamless."</p>
+      <div class="reviewer">
+        <div class="avatar av2">NA</div>
+        <div>
+          <div class="reviewer-name">Norah A.</div>
+          <div class="reviewer-loc">Jeddah · Family Traveler</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-card fade-up">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"As a boat owner, I can now manage all my bookings in one place. My occupancy rate went up significantly since joining WaveTrip. Highly recommended."</p>
+      <div class="reviewer">
+        <div class="avatar av3">MO</div>
+        <div>
+          <div class="reviewer-name">Mohammed O.</div>
+          <div class="reviewer-loc">Dammam · Boat Owner</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div class="cta-band">
+  <h2>Ready to Cast Off?</h2>
+  <p>Join hundreds of fishing enthusiasts and boat owners already on WaveTrip.</p>
+  <a href="#" class="btn-dark">Start Your Adventure →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a class="nav-logo" href="#"><span class="wave-icon">🌊</span> WaveTrip</a>
+      <p>Saudi Arabia's trusted marketplace for boat bookings and fishing trips. Connecting captains and adventurers since 2026.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <ul>
+        <li><a href="#">Browse Boats</a></li>
+        <li><a href="#">Activity Bundles</a></li>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="#">List Your Boat</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">How It Works</a></li>
+        <li><a href="#">Reviews</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Refund Policy</a></li>
+        <li><a href="#">Security</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 WaveTrip. All rights reserved.</span>
+    <span>Khalid Alkhalawi · Turki Alotaibi</span>
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
